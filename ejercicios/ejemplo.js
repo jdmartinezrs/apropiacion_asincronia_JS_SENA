@@ -8,7 +8,7 @@ export const explorandoAsincronia =()=>{
   console.log("Inicio")
   setTimeout (()=>{
     console.log("Fin")
-  },'2000');
+  },2000);
 }
 
 /**
@@ -33,11 +33,51 @@ Meta: mostrar la complejidad que aparece cuando las tareas dependen unas de otra
 
  */
 
-export const crearCita=(cita, callback)=>{
+export const crearCita=(cita, funcionParaLlamar)=>{
   let miCita = "Como yo siempre digo, " + cita;
-  callback(miCita);
+  funcionParaLlamar(miCita);
 }
 
 export const logCita=(cita)=>{
   console.log(cita);
 }
+
+/**Ejemplo solicitud Servidor solo tiene  */
+export const solicitudServidor = (consulta, callback)=>{
+setTimeout(()=>{
+  let respuesta = consulta + "lleno!"
+  callback(respuesta);
+},5000)
+}
+
+export const obtenerResultados=(resultados)=>{
+  console.log("Respuesta del servidor: " + resultados);
+}
+
+
+/**Crear tres procesos consecutivos: */
+
+// Tomar datos
+
+export const tomarDatos = (callback) => {
+  setTimeout(()=> {
+    let datos = "Datos del servidor";
+    callback(datos);
+  },2000);
+}
+
+//2. Procesar datos
+
+export const procesarDatos = (datos, callback) =>{
+  setTimeout(()=> {
+    let resultado = datos + "procesados";
+    callback(resultado);
+  }, 2000);
+}
+
+// 3. Mostrar Resultado
+export const mostrarResultado = (resultado) =>{
+  setTimeout(()=>{
+    console.log("Resultado final: " + resultado);
+  }, 2000);
+};
