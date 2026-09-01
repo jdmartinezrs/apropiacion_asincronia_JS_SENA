@@ -1,0 +1,21 @@
+{
+  "name": "apropiacion_asincronia_js_sena",
+  "version": "1.0.0",
+  "description": "A. Actividades de apropiación del conocimiento.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jdmartinezrs/apropiacion_asincronia_JS_SENA.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/jdmartinezrs/apropiacion_asincronia_JS_SENA/issues"
+  },
+  "homepage": "https://github.com/jdmartinezrs/apropiacion_asincronia_JS_SENA#readme"
+}
