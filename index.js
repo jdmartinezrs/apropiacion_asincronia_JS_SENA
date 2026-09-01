@@ -1,3 +1,4 @@
-import { explorandoAsincronia } from './ejercicios/index.js';
+import { explorandoAsincronia, cicloMuyGrande } from './ejercicios/index.js';
 
 explorandoAsincronia();
+cicloMuyGrande(1000000000);

@@ -11,4 +11,15 @@ export const explorandoAsincronia =()=>{
   },'2000');
 }
 
-
+/**
+ * 2. Identificando código bloqueante
+Ejercicio:
+Crea un ciclo muy grande (por ejemplo, uno que cuente hasta millones) y observa cómo afecta la
+ejecución del programa.
+Meta: evidenciar cómo una tarea pesada bloquea el hilo principal.
+ */
+export const cicloMuyGrande =(cantidad)=>{
+  for(let i =0; i<cantidad; i++){
+  }
+    console.log("Terminado")
+}
