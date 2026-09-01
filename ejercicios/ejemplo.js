@@ -23,3 +23,21 @@ export const cicloMuyGrande =(cantidad)=>{
   }
     console.log("Terminado")
 }
+
+/**
+ * 4. Encadenamiento de Callbacks (Callback Hell controlado)
+Ejercicio:
+Crear tres procesos consecutivos (por ejemplo: tomar datos → procesar datos → mostrar
+resultado), cada uno con un setTimeout, y enlazarlos mediante callbacks.
+Meta: mostrar la complejidad que aparece cuando las tareas dependen unas de otras.
+
+ */
+
+export const crearCita=(cita, callback)=>{
+  let miCita = "Como yo siempre digo, " + cita;
+  callback(miCita);
+}
+
+export const logCita=(cita)=>{
+  console.log(cita);
+}
