@@ -43,6 +43,7 @@ export const logCita=(cita)=>{
 }
 
 /**Ejemplo solicitud Servidor solo tiene  */
+/*
 export const solicitudServidor = (consulta, callback)=>{
 setTimeout(()=>{
   let respuesta = consulta + "lleno!"
@@ -58,7 +59,7 @@ export const obtenerResultados=(resultados)=>{
 /**Crear tres procesos consecutivos: */
 
 // Tomar datos
-
+/*
 export const tomarDatos = (callback) => {
   setTimeout(()=> {
     let datos = "Datos del servidor";
@@ -80,4 +81,38 @@ export const mostrarResultado = (resultado) =>{
   setTimeout(()=>{
     console.log("Resultado final: " + resultado);
   }, 2000);
+}
+*/
+/**
+ * 
+ * 5. Transformando Callbacks en Promesas
+Ejercicio:
+Convertir el ejercicio anterior en una estructura basada en Promesas con .then().
+Meta: visualizar cómo mejora la legibilidad.
+ */
+
+export const solicitudServidor = (consulta) => {
+  return new Promise((resolve, reject) =>{
+    setTimeout(() => {
+      let respuesta = consulta + "recibido correctamente";
+      resolve(respuesta);
+    },5000);
+  });
 };
+
+// 2. Procesar datos
+
+export const procesarDatos = (datos) => {
+  return new Promise ((resolve, reject) =>{
+    setTimeout(()=>{
+      let resultado = datos + " y procesado con éxito";
+      resolve(resultado);
+    }, 5000);
+  });
+};
+
+//Mostrar Resultado 
+
+export const obtenerResultados = (resultados)=> {
+  console.log("PROMESA → Resultado obtenido: " + resultados)
+}

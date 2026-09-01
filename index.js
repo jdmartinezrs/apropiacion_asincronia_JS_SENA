@@ -4,9 +4,9 @@ import { explorandoAsincronia,
      logCita,
      solicitudServidor,
      obtenerResultados,
-    tomarDatos,
+   // tomarDatos,
     procesarDatos,
-    mostrarResultado
+    //mostrarResultado
     } from './ejercicios/index.js';
 
 explorandoAsincronia();
@@ -15,11 +15,23 @@ crearCita("Come tus vegetales", logCita);
 crearCita("Come tus vegetales", (cita)=>{
     console.log(cita);
 });
-
+/*
 solicitudServidor("El vaso está medio lleno ",obtenerResultados);
 
 tomarDatos((datos)=>{
     procesarDatos(datos, (resultado)=>{
         mostrarResultado(resultado)
     });
-});
+});*/
+
+//Encadenamiento de Promesas
+
+solicitudServidor("sERVIDOR: dATOS ")
+.then((respuesta)=>{
+    console.log("pROMESA -> dATOS reCIBIDOS: " + respuesta);
+    return procesarDatos(respuesta);
+})
+.then((resultado)=>{
+    console.log("pROMESA -> pROCESAMIENTO Terminado");
+    obtenerResultados(resultado);
+})
