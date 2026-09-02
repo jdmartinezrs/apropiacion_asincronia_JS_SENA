@@ -6,7 +6,8 @@ import { explorandoAsincronia,
      obtenerResultados,
    // tomarDatos,
     procesarDatos,
-    //mostrarResultado
+    manejoErroresPromesas,
+    //mostrarResultado,
     } from './ejercicios/index.js';
 
 explorandoAsincronia();
@@ -35,3 +36,13 @@ solicitudServidor("sERVIDOR: dATOS ")
     console.log("pROMESA -> pROCESAMIENTO Terminado");
     obtenerResultados(resultado);
 })
+
+
+//uso de catch para manejo de errores
+manejoErroresPromesas()
+  .then((response) => {
+    console.log(response);
+  })
+  .catch((error) => {
+    console.log(error);
+  });

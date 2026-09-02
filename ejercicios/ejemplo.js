@@ -111,8 +111,29 @@ export const procesarDatos = (datos) => {
   });
 };
 
-//Mostrar Resultado 
+// Mostrar Resultado 
 
 export const obtenerResultados = (resultados)=> {
   console.log("PROMESA → Resultado obtenido: " + resultados)
 }
+
+/**
+6. Manejo de errores con Promesas
+Ejercicio:
+Crear una promesa que simule un proceso que puede fallar 50% de las veces usando resolve y
+reject.
+Meta: entender .catch() y la importancia del manejo de errores.
+ */
+
+export const manejoErroresPromesas = () => {
+  return new Promise((resolve, reject) => {
+    const num = Math.random();
+    if (num >= 0.5) {
+      resolve("promesa cumplida");
+    } else {
+      reject("promesa rechazada");
+    }
+  });
+};
+
+
