@@ -8,7 +8,6 @@ import { explorandoAsincronia,
     procesarDatos,
     manejoErroresPromesas,
     esperarDosSegundos,
-    esperar2segundos
     //mostrarResultado,
     
     } from './ejercicios/index.js';
