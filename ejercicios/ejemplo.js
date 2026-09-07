@@ -137,3 +137,27 @@ export const manejoErroresPromesas = () => {
 };
 
 
+/**
+ * ****
+ * 7. Uso de Async/Await
+Ejercicio:
+Crear una función async que espere una promesa de 2 segundos y luego muestre el resultado.
+Meta: comprender cómo await pausa la ejecución sin bloquear el hilo.
+ * ***************
+ * *****************
+ */
+export function esperar2segundos() {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve("hola");
+    }, 2000);
+  });
+}
+
+export const esperarDosSegundos = async () => {
+  let saludo = await esperar2segundos();
+
+  console.log(`When I saw her I said ${saludo}`);
+};
+
+

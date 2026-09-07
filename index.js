@@ -7,7 +7,10 @@ import { explorandoAsincronia,
    // tomarDatos,
     procesarDatos,
     manejoErroresPromesas,
+    esperarDosSegundos,
+    esperar2segundos
     //mostrarResultado,
+    
     } from './ejercicios/index.js';
 
 explorandoAsincronia();
@@ -46,3 +49,6 @@ manejoErroresPromesas()
   .catch((error) => {
     console.log(error);
   });
+
+
+esperarDosSegundos();
