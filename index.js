@@ -1,32 +1,49 @@
-import { procesarValidacionFormulario} from './ejercicios/index.js';
+import {procesarPedido} from './ejercicios/index.js';
 
-// Datos de entrada 1: Usuario con datos correctos
-const datosUsuarioValido = {
-  correo: "juan.perez@email.com",
-  documento: "1020304050",
-  usuario: "jperez2026"
+// Caso 1: Pedido procesado con éxito
+const pedidoCorrecto = {
+  id: "PED-101",
+  tiempos: {
+    stock: 1000,
+    costos: 1200,
+    recomendaciones: 3000, // Tarda más, pero corre en paralelo sin bloquear
+    factura: 800
+  },
+  fallas: {
+    stock: false,
+    costos: false,
+    recomendaciones: false,
+    factura: false
+  }
 };
 
-// Tiempos simulados de respuesta para cada servicio externo (en milisegundos)
-const tiemposServicios = {
-  correo: 1500,
-  documento: 800,
-  usuario: 1200
+const iniciar = async () => {
+  const reporte = await procesarPedido(
+    pedidoCorrecto.id,
+    pedidoCorrecto.tiempos,
+    pedidoCorrecto.fallas
+  );
+
+  console.log("=== FLUJO REAL DE EJECUCIÓN Y FINALIZACIÓN ===");
+  for (let i = 0; i < reporte.flujoEjecucion.length; i++) {
+    console.log(`  ${i + 1}. ${reporte.flujoEjecucion[i]}`);
+  }
+
+  console.log("\n=== RESULTADOS INDIVIDUALES ===");
+  console.log(`  • Stock:           ${reporte.resultados.stock?.detalle}`);
+  console.log(`  • Costos:          ${reporte.resultados.costos?.detalle}`);
+  console.log(`  • Recomendación:   ${reporte.resultados.recomendaciones?.detalle}`);
+  console.log(`  • Factura:         ${reporte.resultados.factura?.detalle || "No generada"}`);
+
+  console.log("\n===========================================");
+  if (reporte.exitoGeneral) {
+    console.log(`ESTADO: Proceso Exitoso.`);
+    console.log(`DOCUMENTO: ${reporte.facturaGenerada}`);
+  } else {
+    console.log(`ESTADO: ${reporte.errorSistema}`);
+    console.log(`DOCUMENTO: Error del sistema (Factura no generada).`);
+  }
+  console.log("===========================================");
 };
 
-// Función ejecutora con async/await
-const iniciarValidacion = async () => {
-  const reporte = await procesarValidacionFormulario(datosUsuarioValido, tiemposServicios);
-
-  console.log("=== INFORME DE VALIDACIÓN ===");
-  console.log(`Estado Correo:    [${reporte.estadoValidaciones.correo.estado}] - ${reporte.estadoValidaciones.correo.detalle}`);
-  console.log(`Estado Documento: [${reporte.estadoValidaciones.documento.estado}] - ${reporte.estadoValidaciones.documento.detalle}`);
-  console.log(`Estado Usuario:   [${reporte.estadoValidaciones.usuario.estado}] - ${reporte.estadoValidaciones.usuario.detalle}`);
-  
-  console.log("\n-------------------------------------------");
-  console.log(`RESULTADO FINAL: ${reporte.resultadoFinal}`);
-  console.log(`TIEMPO TOTAL DEL PROCESO: ${reporte.tiempoTotal} ms`);
-  console.log("-------------------------------------------");
-};
-
-iniciarValidacion();
+iniciar();

@@ -1,116 +1,101 @@
 /**
- * 3. Validación de un formulario con múltiples verificaciones externas
+4. Procesamiento de pedidos con pasos obligatorios y opcionales
 Enunciado
-Un sistema debe validar un formulario realizando tres verificaciones asincrónicas:
-1. Validar correo en un servicio externo.
-2. Validar documento en una base remota.
-3. Validar disponibilidad del usuario en un registro global.
-
-GFPI-F-135 V04
-
-Las tres validaciones pueden ocurrir en paralelo, pero el sistema solo puede continuar si
-todas responden satisfactoriamente.
+Un sistema de ventas debe procesar pedidos en el siguiente flujo:
+1. Validar stock (obligatorio).
+2. Calcular costos finales (obligatorio).
+3. Generar recomendaciones al cliente (opcional).
+4. Enviar factura electrónica (obligatorio, pero depende de los dos primeros pasos).
+El aprendiz debe simular este proceso asincrónico controlando dependencias, tiempo de
+ejecución y manejo de errores.
 Requerimientos
-• Ejecutar las validaciones en paralelo.
-• Capturar errores individuales y globales.
-• Consolidar un objeto con los estados de validación.
-• Medir el tiempo total del proceso.
+• Control estricto del orden de pasos obligatorios.
+• Permitir que la recomendación se procese en paralelo sin bloquear el flujo.
+• Generar factura solo si los pasos obligatorios son exitosos.
+• Mostrar el orden real de ejecución y finalización.
 Datos de entrada
-• Datos básicos del usuario (correo, documento, nombre).
-• Tiempos simulados de respuesta de cada verificación.
+• ID del pedido.
+• Tiempos estimados por cada proceso.
 Datos de salida
-• Estado individual de cada validación.
-• Resultado final: “Formulario validado” o “Validación fallida”.
-• Tiempo total del proceso.
+• Resultados individuales.
+• Flujo real de ejecución.
+• Factura generada o error del sistema.
  */
-
-// Simulación de validación de correo
-const validarCorreo = (correo, tiempo) => {
+// Función auxiliar para simular pasos asincrónicos
+const ejecutarPaso = (nombrePaso, tiempo, debeFallar = false) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      if (correo.indexOf("@") !== -1) {
-        resolve("Correo verificado correctamente.");
+      if (debeFallar) {
+        reject(`Fallo en el paso: ${nombrePaso}`);
       } else {
-        reject("Correo no válido: Falta el símbolo '@'.");
+        resolve(`Completado: ${nombrePaso}`);
       }
     }, tiempo);
   });
 };
 
-// Simulación de validación de documento en base remota
-const validarDocumento = (documento, tiempo) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (documento.length >= 8) {
-        resolve("Documento verificado en la base remota.");
-      } else {
-        reject("Documento no válido: Debe tener al menos 8 dígitos.");
-      }
-    }, tiempo);
-  });
-};
+// Módulo principal del flujo de pedidos
+export const procesarPedido = async (pedidoId, tiempos, fallas = {}) => {
+  console.log(`=== INICIANDO PROCESAMIENTO DEL PEDIDO: ${pedidoId} ===\n`);
 
-// Simulación de disponibilidad de usuario en registro global
-const validarDisponibilidadUsuario = (usuario, tiempo) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (usuario !== "admin") {
-        resolve("Nombre de usuario disponible.");
-      } else {
-        reject("Usuario no disponible: El nombre ya está ocupado.");
-      }
-    }, tiempo);
-  });
-};
+  const flujoEjecucion = [];
+  const resultados = {};
+  
+  // Función helper para registrar el orden exacto de finalización
+  const registrarFin = (paso, mensaje) => {
+    flujoEjecucion[flujoEjecucion.length] = `[FIN] ${paso} (${mensaje})`;
+  };
 
-// Envoltorio individual para capturar el estado (exitoso o fallido) sin tumbar las demás promesas
-const ejecutarVerificacion = async (fnValidacion, valor, tiempo) => {
   try {
-    const mensaje = await fnValidacion(valor, tiempo);
-    return { estado: "Aprobado", detalle: mensaje };
-  } catch (error) {
-    return { estado: "Rechazado", detalle: error };
+    // 1. PASO OBLIGATORIO: Validar Stock
+    flujoEjecucion[flujoEjecucion.length] = "[INICIO] Validar Stock";
+    const resStock = await ejecutarPaso("Validar Stock", tiempos.stock, fallas.stock);
+    resultados.stock = { exito: true, detalle: resStock };
+    registrarFin("Validar Stock", resStock);
+
+    // 2. PASO OPIONAL EN PARALELO: Recomendaciones (No se usa 'await' para no bloquear el flujo)
+    flujoEjecucion[flujoEjecucion.length] = "[INICIO] Generar Recomendaciones (Opcional)";
+    const promesaRecomendaciones = ejecutarPaso("Generar Recomendaciones", tiempos.recomendaciones, fallas.recomendaciones)
+      .then((res) => {
+        resultados.recomendaciones = { exito: true, detalle: res };
+        registrarFin("Generar Recomendaciones", res);
+      })
+      .catch((err) => {
+        resultados.recomendaciones = { exito: false, detalle: err };
+        registrarFin("Generar Recomendaciones (ERROR)", err);
+      });
+
+    // 3. PASO OBLIGATORIO: Calcular Costos Finales
+    flujoEjecucion[flujoEjecucion.length] = "[INICIO] Calcular Costos Finales";
+    const resCostos = await ejecutarPaso("Calcular Costos Finales", tiempos.costos, fallas.costos);
+    resultados.costos = { exito: true, detalle: resCostos };
+    registrarFin("Calcular Costos Finales", resCostos);
+
+    // 4. PASO OBLIGATORIO FINAL: Generar Factura Electrónica
+    // (Solo se ejecuta si los dos pasos anteriores no lanzaron excepciones)
+    flujoEjecucion[flujoEjecucion.length] = "[INICIO] Generar Factura Electrónica";
+    const resFactura = await ejecutarPaso("Generar Factura Electrónica", tiempos.factura, fallas.factura);
+    resultados.factura = { exito: true, detalle: resFactura };
+    registrarFin("Generar Factura Electrónica", resFactura);
+
+    // Esperar a que la tarea opcional termine antes de retornar el informe final
+    await promesaRecomendaciones;
+
+    return {
+      exitoGeneral: true,
+      facturaGenerada: `FACTURA-ELECTRONICA-${pedidoId}-OK`,
+      resultados,
+      flujoEjecucion
+    };
+
+  } catch (errorPasoObligatorio) {
+    // Si falla un paso obligatorio, se captura aquí y no se genera la factura
+    return {
+      exitoGeneral: false,
+      errorSistema: errorPasoObligatorio,
+      facturaGenerada: null,
+      resultados,
+      flujoEjecucion
+    };
   }
-};
-
-// Función principal que ejecuta las validaciones en paralelo con async/await
-export const procesarValidacionFormulario = async (datosFormulario, tiemposSimulados) => {
-  console.log("=== INICIANDO VERIFICACIONES EXTERNAS EN PARALELO ===\n");
-
-  const tiempoInicio = Date.now();
-
-  // Se lanzan las 3 promesas en paralelo
-  const promesas = [
-    ejecutarVerificacion(validarCorreo, datosFormulario.correo, tiemposSimulados.correo),
-    ejecutarVerificacion(validarDocumento, datosFormulario.documento, tiemposSimulados.documento),
-    ejecutarVerificacion(validarDisponibilidadUsuario, datosFormulario.usuario, tiemposSimulados.usuario)
-  ];
-
-  // Se esperan las 3 validaciones de forma simultánea
-  const resultados = await Promise.all(promesas);
-
-  const tiempoTotal = Date.now() - tiempoInicio;
-
-  // Consolidar el objeto con los estados individuales
-  const estadoValidaciones = {
-    correo: resultados[0],
-    documento: resultados[1],
-    usuario: resultados[2]
-  };
-
-  // Evaluar si TODAS las validaciones fueron aprobadas
-  let formularioAprobado = true;
-  for (let i = 0; i < resultados.length; i++) {
-    if (resultados[i].estado !== "Aprobado") {
-      formularioAprobado = false;
-    }
-  }
-
-  const resultadoFinal = formularioAprobado ? "Formulario validado" : "Validación fallida";
-
-  return {
-    estadoValidaciones,
-    resultadoFinal,
-    tiempoTotal
-  };
 };
