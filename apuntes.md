@@ -206,3 +206,159 @@ async function announceDinner() {
   console.log(`I'm going to make ${reolved} for dinner.`)
 }
  announceDinner() 
+
+
+//////// CORREECT WHAY OB GET THE VALUE OF A PROMISE ////////////
+
+const shopForBeans = require('./library.js');
+
+async function getBeans() {
+  console.log(`1. Heading to the store to buy beans...`);
+  let value =  await shopForBeans();
+  console.log(`3. Great! I'm making ${value} beans for dinner tonight!`);
+}
+
+getBeans();
+
+
+
+/////////////////////// Handling Dependent Promises////////////////////////////
+
+function nativePromiseVersion() {
+  returnsFirstPromise()
+    .then((firstValue) => {
+      console.log(firstValue);
+      return returnsSecondPromise(firstValue);
+    })
+   .then((secondValue) => {
+      console.log(secondValue);
+    });
+}
+
+/////CON ASYNC / AWAIT ///////////////////
+
+async function asyncAwaitVersion() {
+  let firstValue = await returnsFirstPromise();
+  console.log(firstValue);
+  let secondValue = await returnsSecondPromise(firstValue);
+  console.log(secondValue);
+}
+
+
+//////ejemplo handling dependent promises/////////
+const {shopForBeans, soakTheBeans, cookTheBeans} = require('./library.js');
+
+// Write your code below:
+const makeBeans = async()=>{
+  let type = await shopForBeans()
+  let isSoft = await soakTheBeans(type)
+  let dinner = await cookTheBeans(isSoft)
+  console.log(dinner)
+}
+
+makeBeans()
+
+
+////// Handling errors with TRY CATCH ////////
+
+async function usingTryCatch() {
+ try {
+   let resolveValue = await asyncFunction('thing that will fail');
+   let secondValue = await secondAsyncFunction(resolveValue);
+ } catch (err) {
+   // Catches any errors in the try block
+   console.log(err);
+ }
+}
+
+usingTryCatch();
+
+
+const cookBeanSouffle = require('./library.js');
+
+// Write your code below:
+
+const hostDinnerParty = async () => {
+
+  try {
+    let hint = await cookBeanSouffle();
+
+    console.log(`${hint} is served!`);
+
+  } catch (error) {
+console.log(error)
+console.log('Ordering a pizza!')
+  }
+
+}
+hostDinnerParty()
+
+///error handling ///
+const cookBeanSouffle = require('./library.js');
+
+// Write your code below:
+
+const hostDinnerParty = async () => {
+
+  try {
+    let hint = await cookBeanSouffle();
+
+    console.log(`${hint} is served!`);
+
+  } catch (error) {
+console.log(error)
+console.log('Ordering a pizza!')
+  }
+
+}
+hostDinnerParty()
+
+//// error handling ////
+
+const cookBeanSouffle = require('./library.js');
+
+// Write your code below:
+
+const hostDinnerParty = async () => {
+
+  try {
+    let hint = await cookBeanSouffle();
+
+    console.log(`${hint} is served!`);
+
+  } catch (error) {
+console.log(error)
+console.log('Ordering a pizza!')
+  }
+
+}
+hostDinnerParty()
+
+
+
+
+
+
+//////Handling Independent Promises//////
+
+const serveDinner = async()=>{
+
+const vegetablePromise = steamBroccoli()
+const starchPromise = cookRice()
+const proteinPromise = bakeChicken()
+const sidePromise = cookBeans()
+console.log(`Dinner is served. We're having ${await vegetablePromise}, ${await starchPromise}, ${await proteinPromise}, and ${await sidePromise}.`);
+}
+
+serveDinner()
+
+
+
+//////Await Promise.all()////
+
+async function asyncPromAll() {
+  const resultArray = await Promise.all([asyncTask1(), asyncTask2(), asyncTask3(), asyncTask4()]);
+  for (let i = 0; i<resultArray.length; i++){
+    console.log(resultArray[i]); 
+  }
+}
