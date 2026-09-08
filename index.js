@@ -1,49 +1,54 @@
-import {procesarPedido} from './ejercicios/index.js';
+import {integrarServiciosUsuario} from './ejercicios/index.js';
 
-// Caso 1: Pedido procesado con éxito
-const pedidoCorrecto = {
-  id: "PED-101",
-  tiempos: {
-    stock: 1000,
-    costos: 1200,
-    recomendaciones: 3000, // Tarda más, pero corre en paralelo sin bloquear
-    factura: 800
-  },
-  fallas: {
-    stock: false,
-    costos: false,
-    recomendaciones: false,
-    factura: false
-  }
+// Configuración de prueba
+const usuarioId = "USR-9942";
+
+// Tiempos simulados por cada servicio (en milisegundos)
+const tiemposServicios = {
+  servicioA: 1000,
+  servicioB: 1500,
+  servicioC: 800,
+  servicioD: 1200
+};
+
+// Flags de fallo para probar tolerancia y manejo de errores aislados
+const fallasSimuladas = {
+  servicioA: false,
+  servicioB: false, // Si cambias B o C a true, D se cancelará automáticamente
+  servicioC: false,
+  servicioD: false
 };
 
 const iniciar = async () => {
-  const reporte = await procesarPedido(
-    pedidoCorrecto.id,
-    pedidoCorrecto.tiempos,
-    pedidoCorrecto.fallas
-  );
+  const reporte = await integrarServiciosUsuario(usuarioId, tiemposServicios, fallasSimuladas);
 
-  console.log("=== FLUJO REAL DE EJECUCIÓN Y FINALIZACIÓN ===");
-  for (let i = 0; i < reporte.flujoEjecucion.length; i++) {
-    console.log(`  ${i + 1}. ${reporte.flujoEjecucion[i]}`);
+  console.log("=== INFORME FINAL UNIFICADO ===");
+  console.log(`Usuario ID:    ${reporte.usuarioId}`);
+  console.log(`Estado Global: ${reporte.estadoGlobal}`);
+  console.log(`Tiempo Total:  ${reporte.tiempoTotal} ms\n`);
+
+  console.log("--- Tiempos y Estado Individual por Servicio ---");
+  const lista = [
+    reporte.servicios.servicioA,
+    reporte.servicios.servicioB,
+    reporte.servicios.servicioC,
+    reporte.servicios.servicioD
+  ];
+
+  for (let i = 0; i < lista.length; i++) {
+    const s = lista[i];
+    if (s.exito) {
+      console.log(`  ✔ [${s.servicio}] -> ${s.tiempo} ms | Respuesta: ${s.datos}`);
+    } else {
+      console.log(`  ✖ [${s.servicio}] -> ${s.tiempo} ms | Error: ${s.error}`);
+    }
   }
 
-  console.log("\n=== RESULTADOS INDIVIDUALES ===");
-  console.log(`  • Stock:           ${reporte.resultados.stock?.detalle}`);
-  console.log(`  • Costos:          ${reporte.resultados.costos?.detalle}`);
-  console.log(`  • Recomendación:   ${reporte.resultados.recomendaciones?.detalle}`);
-  console.log(`  • Factura:         ${reporte.resultados.factura?.detalle || "No generada"}`);
-
-  console.log("\n===========================================");
-  if (reporte.exitoGeneral) {
-    console.log(`ESTADO: Proceso Exitoso.`);
-    console.log(`DOCUMENTO: ${reporte.facturaGenerada}`);
-  } else {
-    console.log(`ESTADO: ${reporte.errorSistema}`);
-    console.log(`DOCUMENTO: Error del sistema (Factura no generada).`);
+  console.log("\n--- Orden Real de Finalización de Servicios ---");
+  for (let i = 0; i < reporte.ordenFinalizacion.length; i++) {
+    const item = reporte.ordenFinalizacion[i];
+    console.log(`  ${i + 1}°. ${item.servicio} (${item.tiempo} ms) - ${item.exito ? 'Éxito' : 'Fallo'}`);
   }
-  console.log("===========================================");
 };
 
 iniciar();
