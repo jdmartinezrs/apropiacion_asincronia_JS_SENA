@@ -1,34 +1,32 @@
-import { procesarEntregasParalelo} from './ejercicios/index.js';
+import { procesarValidacionFormulario} from './ejercicios/index.js';
 
-const paquetes = [
-  { id: "PK-001", tiempo: 3000, falla: false },
-  { id: "PK-002", tiempo: 1000, falla: false },
-  { id: "PK-003", tiempo: 2000, falla: true  }, // Paquete que fallará
-  { id: "PK-004", tiempo: 1500, falla: false }
-];
-
-const iniciarSistema = async () => {
-  const informe = await procesarEntregasParalelo(paquetes);
-
-  console.log("\n=== INFORMES Y RESUMEN FINAL ===");
-
-  // 1. Mostrar orden real de finalización
-  console.log("\nOrden real en que finalizaron exitosamente:");
-  for (let i = 0; i < informe.ordenFinalizacion.length; i++) {
-    console.log(`  ${i + 1}°. Paquete ${informe.ordenFinalizacion[i]}`);
-  }
-
-  // 2. Mostrar detalle consolidado
-  console.log("\nResultado detallado de las entregas:");
-  for (let i = 0; i < informe.resultados.length; i++) {
-    const res = informe.resultados[i];
-
-    if (res.exito) {
-      console.log(`  ✔ [ÉXITO] ${res.id} - Entregado (${res.tiempo}ms)`);
-    } else {
-      console.log(`  ✖ [FALLO] ${res.mensajeError}`);
-    }
-  }
+// Datos de entrada 1: Usuario con datos correctos
+const datosUsuarioValido = {
+  correo: "juan.perez@email.com",
+  documento: "1020304050",
+  usuario: "jperez2026"
 };
 
-iniciarSistema();
+// Tiempos simulados de respuesta para cada servicio externo (en milisegundos)
+const tiemposServicios = {
+  correo: 1500,
+  documento: 800,
+  usuario: 1200
+};
+
+// Función ejecutora con async/await
+const iniciarValidacion = async () => {
+  const reporte = await procesarValidacionFormulario(datosUsuarioValido, tiemposServicios);
+
+  console.log("=== INFORME DE VALIDACIÓN ===");
+  console.log(`Estado Correo:    [${reporte.estadoValidaciones.correo.estado}] - ${reporte.estadoValidaciones.correo.detalle}`);
+  console.log(`Estado Documento: [${reporte.estadoValidaciones.documento.estado}] - ${reporte.estadoValidaciones.documento.detalle}`);
+  console.log(`Estado Usuario:   [${reporte.estadoValidaciones.usuario.estado}] - ${reporte.estadoValidaciones.usuario.detalle}`);
+  
+  console.log("\n-------------------------------------------");
+  console.log(`RESULTADO FINAL: ${reporte.resultadoFinal}`);
+  console.log(`TIEMPO TOTAL DEL PROCESO: ${reporte.tiempoTotal} ms`);
+  console.log("-------------------------------------------");
+};
+
+iniciarValidacion();

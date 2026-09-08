@@ -1,77 +1,116 @@
-/*
-1. Gestión de una cola de atención
+/**
+ * 3. Validación de un formulario con múltiples verificaciones externas
 Enunciado
-Un módulo de soporte registra solicitudes de usuarios. Cada solicitud tarda un tiempo
-distinto en ser atendida. Aunque el sistema atiende cada solicitud por turno (una a la vez),
-el aprendiz debe simular el tiempo de espera, registrar el orden de atención y calcular la
-duración total del proceso.
+Un sistema debe validar un formulario realizando tres verificaciones asincrónicas:
+1. Validar correo en un servicio externo.
+2. Validar documento en una base remota.
+3. Validar disponibilidad del usuario en un registro global.
+
+GFPI-F-135 V04
+
+Las tres validaciones pueden ocurrir en paralelo, pero el sistema solo puede continuar si
+todas responden satisfactoriamente.
 Requerimientos
-• Procesar solicitudes de manera secuencial.
-• Registrar inicio y fin de cada atención.
-• Identificar el tiempo total del proceso.
-• Usar asincronía controlada (callback, promesa o async/await).
+• Ejecutar las validaciones en paralelo.
+• Capturar errores individuales y globales.
+• Consolidar un objeto con los estados de validación.
+• Medir el tiempo total del proceso.
 Datos de entrada
-• Lista de usuarios con un tiempo estimado de atención.
+• Datos básicos del usuario (correo, documento, nombre).
+• Tiempos simulados de respuesta de cada verificación.
 Datos de salida
-• Orden real de atención.
-• Tiempo de atención por usuario.
+• Estado individual de cada validación.
+• Resultado final: “Formulario validado” o “Validación fallida”.
 • Tiempo total del proceso.
-*/
-// Simulación de una entrega usando Promesa estándar con Executor
+ */
 
-// Simulación de una entrega usando Promesa estándar con Executor
-const entregarPaquete = (paquete, ordenFinalizacion) => {
+// Simulación de validación de correo
+const validarCorreo = (correo, tiempo) => {
   return new Promise((resolve, reject) => {
-    console.log(`[SALIDA] Paquete ${paquete.id} en camino...`);
-
     setTimeout(() => {
-      if (paquete.falla) {
-        reject(`Error en paquete ${paquete.id}: Dirección no encontrada.`);
+      if (correo.indexOf("@") !== -1) {
+        resolve("Correo verificado correctamente.");
       } else {
-        ordenFinalizacion[ordenFinalizacion.length] = paquete.id;
-        console.log(`[LLEGADA] Paquete ${paquete.id} entregado en ${paquete.tiempo}ms.`);
-        
-        resolve({
-          id: paquete.id,
-          exito: true,
-          tiempo: paquete.tiempo
-        });
+        reject("Correo no válido: Falta el símbolo '@'.");
       }
-    }, paquete.tiempo);
+    }, tiempo);
   });
 };
 
-// Función asíncrona individual que captura errores con try/catch
-const gestionarEntregaSegura = async (paquete, ordenFinalizacion) => {
+// Simulación de validación de documento en base remota
+const validarDocumento = (documento, tiempo) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (documento.length >= 8) {
+        resolve("Documento verificado en la base remota.");
+      } else {
+        reject("Documento no válido: Debe tener al menos 8 dígitos.");
+      }
+    }, tiempo);
+  });
+};
+
+// Simulación de disponibilidad de usuario en registro global
+const validarDisponibilidadUsuario = (usuario, tiempo) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (usuario !== "admin") {
+        resolve("Nombre de usuario disponible.");
+      } else {
+        reject("Usuario no disponible: El nombre ya está ocupado.");
+      }
+    }, tiempo);
+  });
+};
+
+// Envoltorio individual para capturar el estado (exitoso o fallido) sin tumbar las demás promesas
+const ejecutarVerificacion = async (fnValidacion, valor, tiempo) => {
   try {
-    const resultado = await entregarPaquete(paquete, ordenFinalizacion);
-    return resultado;
+    const mensaje = await fnValidacion(valor, tiempo);
+    return { estado: "Aprobado", detalle: mensaje };
   } catch (error) {
-    return {
-      id: paquete.id,
-      exito: false,
-      mensajeError: error
-    };
+    return { estado: "Rechazado", detalle: error };
   }
 };
 
-// Ejecución global en paralelo
-export const procesarEntregasParalelo = async (listaPaquetes) => {
-  console.log("=== INICIANDO ENTREGAS SIMULTÁNEAS ===\n");
+// Función principal que ejecuta las validaciones en paralelo con async/await
+export const procesarValidacionFormulario = async (datosFormulario, tiemposSimulados) => {
+  console.log("=== INICIANDO VERIFICACIONES EXTERNAS EN PARALELO ===\n");
 
-  const ordenFinalizacion = [];
-  const promesas = [];
+  const tiempoInicio = Date.now();
 
-  // Se detona la ejecución de todas las entregas en paralelo
-  for (let i = 0; i < listaPaquetes.length; i++) {
-    promesas[i] = gestionarEntregaSegura(listaPaquetes[i], ordenFinalizacion);
-  }
+  // Se lanzan las 3 promesas en paralelo
+  const promesas = [
+    ejecutarVerificacion(validarCorreo, datosFormulario.correo, tiemposSimulados.correo),
+    ejecutarVerificacion(validarDocumento, datosFormulario.documento, tiemposSimulados.documento),
+    ejecutarVerificacion(validarDisponibilidadUsuario, datosFormulario.usuario, tiemposSimulados.usuario)
+  ];
 
-  // Promise.all procesa las promesas de forma segura porque ninguna será rechazada
+  // Se esperan las 3 validaciones de forma simultánea
   const resultados = await Promise.all(promesas);
 
+  const tiempoTotal = Date.now() - tiempoInicio;
+
+  // Consolidar el objeto con los estados individuales
+  const estadoValidaciones = {
+    correo: resultados[0],
+    documento: resultados[1],
+    usuario: resultados[2]
+  };
+
+  // Evaluar si TODAS las validaciones fueron aprobadas
+  let formularioAprobado = true;
+  for (let i = 0; i < resultados.length; i++) {
+    if (resultados[i].estado !== "Aprobado") {
+      formularioAprobado = false;
+    }
+  }
+
+  const resultadoFinal = formularioAprobado ? "Formulario validado" : "Validación fallida";
+
   return {
-    resultados,
-    ordenFinalizacion
+    estadoValidaciones,
+    resultadoFinal,
+    tiempoTotal
   };
 };
