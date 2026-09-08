@@ -17,43 +17,61 @@ Datos de salida
 • Tiempo de atención por usuario.
 • Tiempo total del proceso.
 */
+// Simulación de una entrega usando Promesa estándar con Executor
 
-// Retorna una promesa que simula la atención asíncrona
-const atenderUsuario = (usuario) => {
-  return new Promise((resolve) => {
-    console.log(`[INICIO] Atendiendo a: ${usuario.nombre}...`);
+// Simulación de una entrega usando Promesa estándar con Executor
+const entregarPaquete = (paquete, ordenFinalizacion) => {
+  return new Promise((resolve, reject) => {
+    console.log(`[SALIDA] Paquete ${paquete.id} en camino...`);
 
     setTimeout(() => {
-      console.log(`[FIN] Atendido: ${usuario.nombre} (${usuario.tiempo}ms)`);
-      resolve(usuario.tiempo);
-    }, usuario.tiempo);
+      if (paquete.falla) {
+        reject(`Error en paquete ${paquete.id}: Dirección no encontrada.`);
+      } else {
+        ordenFinalizacion[ordenFinalizacion.length] = paquete.id;
+        console.log(`[LLEGADA] Paquete ${paquete.id} entregado en ${paquete.tiempo}ms.`);
+        
+        resolve({
+          id: paquete.id,
+          exito: true,
+          tiempo: paquete.tiempo
+        });
+      }
+    }, paquete.tiempo);
   });
 };
 
-// Procesa la cola secuencialmente sin métodos
-export const procesarCola = async (listaUsuarios) => {
-  console.log("=== INICIANDO GESTIÓN DE LA COLA ===\n");
-
-  const ordenAtencion = [];
-  let tiempoTotal = 0;
-
-  // Ciclo clásico 'for' en lugar de métodos de iteración
-  for (let i = 0; i < listaUsuarios.length; i++) {
-    const usuario = listaUsuarios[i];
-    const tiempoAtencion = await atenderUsuario(usuario);
-
-    // Asignación por índice directo sin usar .push()
-    ordenAtencion[i] = {
-      nombre: usuario.nombre,
-      tiempo: tiempoAtencion
+// Función asíncrona individual que captura errores con try/catch
+const gestionarEntregaSegura = async (paquete, ordenFinalizacion) => {
+  try {
+    const resultado = await entregarPaquete(paquete, ordenFinalizacion);
+    return resultado;
+  } catch (error) {
+    return {
+      id: paquete.id,
+      exito: false,
+      mensajeError: error
     };
+  }
+};
 
-    // Acumulador manual del tiempo total
-    tiempoTotal += tiempoAtencion;
+// Ejecución global en paralelo
+export const procesarEntregasParalelo = async (listaPaquetes) => {
+  console.log("=== INICIANDO ENTREGAS SIMULTÁNEAS ===\n");
+
+  const ordenFinalizacion = [];
+  const promesas = [];
+
+  // Se detona la ejecución de todas las entregas en paralelo
+  for (let i = 0; i < listaPaquetes.length; i++) {
+    promesas[i] = gestionarEntregaSegura(listaPaquetes[i], ordenFinalizacion);
   }
 
+  // Promise.all procesa las promesas de forma segura porque ninguna será rechazada
+  const resultados = await Promise.all(promesas);
+
   return {
-    ordenAtencion,
-    tiempoTotal
+    resultados,
+    ordenFinalizacion
   };
 };

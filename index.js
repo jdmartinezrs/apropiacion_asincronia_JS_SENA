@@ -1,26 +1,34 @@
-import { procesarCola } from './ejercicios/index.js';
+import { procesarEntregasParalelo} from './ejercicios/index.js';
 
-// Datos de entrada
-const usuarios = [
-  { nombre: "Carlos Gómez", tiempo: 2000 },
-  { nombre: "María Rodríguez", tiempo: 1000 },
-  { nombre: "Juan Pérez", tiempo: 1500 }
+const paquetes = [
+  { id: "PK-001", tiempo: 3000, falla: false },
+  { id: "PK-002", tiempo: 1000, falla: false },
+  { id: "PK-003", tiempo: 2000, falla: true  }, // Paquete que fallará
+  { id: "PK-004", tiempo: 1500, falla: false }
 ];
 
-// Función principal con async/await
 const iniciarSistema = async () => {
-  const resultado = await procesarCola(usuarios);
+  const informe = await procesarEntregasParalelo(paquetes);
 
-  console.log("\n=== REPORTE FINAL DE ATENCIÓN ===");
-  console.log("Orden real y tiempo de atención por usuario:");
+  console.log("\n=== INFORMES Y RESUMEN FINAL ===");
 
-  // Recorrido por índice 
-  for (let i = 0; i < resultado.ordenAtencion.length; i++) {
-    const item = resultado.ordenAtencion[i];
-    console.log(`  ${i + 1}. ${item.nombre} - ${item.tiempo} ms`);
+  // 1. Mostrar orden real de finalización
+  console.log("\nOrden real en que finalizaron exitosamente:");
+  for (let i = 0; i < informe.ordenFinalizacion.length; i++) {
+    console.log(`  ${i + 1}°. Paquete ${informe.ordenFinalizacion[i]}`);
   }
 
-  console.log(`\nTiempo total del proceso: ${resultado.tiempoTotal} ms`);
+  // 2. Mostrar detalle consolidado
+  console.log("\nResultado detallado de las entregas:");
+  for (let i = 0; i < informe.resultados.length; i++) {
+    const res = informe.resultados[i];
+
+    if (res.exito) {
+      console.log(`  ✔ [ÉXITO] ${res.id} - Entregado (${res.tiempo}ms)`);
+    } else {
+      console.log(`  ✖ [FALLO] ${res.mensajeError}`);
+    }
+  }
 };
 
 iniciarSistema();
