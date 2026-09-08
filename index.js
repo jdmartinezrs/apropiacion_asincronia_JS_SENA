@@ -1,53 +1,26 @@
-import { explorandoAsincronia,
-     cicloMuyGrande,
-     crearCita,
-     logCita,
-     solicitudServidor,
-     obtenerResultados,
-   // tomarDatos,
-    procesarDatos,
-    manejoErroresPromesas,
-    esperarDosSegundos,
-    //mostrarResultado,
-    
-    } from './ejercicios/index.js';
+import { procesarCola } from './ejercicios/index.js';
 
-explorandoAsincronia();
-cicloMuyGrande(1000000000);
-crearCita("Come tus vegetales", logCita);
-crearCita("Come tus vegetales", (cita)=>{
-    console.log(cita);
-});
-/*
-solicitudServidor("El vaso está medio lleno ",obtenerResultados);
+// Datos de entrada
+const usuarios = [
+  { nombre: "Carlos Gómez", tiempo: 2000 },
+  { nombre: "María Rodríguez", tiempo: 1000 },
+  { nombre: "Juan Pérez", tiempo: 1500 }
+];
 
-tomarDatos((datos)=>{
-    procesarDatos(datos, (resultado)=>{
-        mostrarResultado(resultado)
-    });
-});*/
+// Función principal con async/await
+const iniciarSistema = async () => {
+  const resultado = await procesarCola(usuarios);
 
-//Encadenamiento de Promesas
+  console.log("\n=== REPORTE FINAL DE ATENCIÓN ===");
+  console.log("Orden real y tiempo de atención por usuario:");
 
-solicitudServidor("sERVIDOR: dATOS ")
-.then((respuesta)=>{
-    console.log("pROMESA -> dATOS reCIBIDOS: " + respuesta);
-    return procesarDatos(respuesta);
-})
-.then((resultado)=>{
-    console.log("pROMESA -> pROCESAMIENTO Terminado");
-    obtenerResultados(resultado);
-})
+  // Recorrido por índice 
+  for (let i = 0; i < resultado.ordenAtencion.length; i++) {
+    const item = resultado.ordenAtencion[i];
+    console.log(`  ${i + 1}. ${item.nombre} - ${item.tiempo} ms`);
+  }
 
+  console.log(`\nTiempo total del proceso: ${resultado.tiempoTotal} ms`);
+};
 
-//uso de catch para manejo de errores
-manejoErroresPromesas()
-  .then((response) => {
-    console.log(response);
-  })
-  .catch((error) => {
-    console.log(error);
-  });
-
-
-esperarDosSegundos();
+iniciarSistema();
